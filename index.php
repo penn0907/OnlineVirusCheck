@@ -24,7 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $headerLength = 0x3C;
                     break;
                 case 'pdf':
-                    $headerLength = 5;
+                    // Dynamically find the first occurrence of 'obj' to determine the start of content
+                    if (preg_match('/obj/i', $fileContent, $matches, PREG_OFFSET_CAPTURE, 10)) {
+                        $headerLength = $matches[0][1]; // Position of the first 'obj'
+                    } else {
+                        $headerLength = 0; // Fallback if no 'obj' is found
+                    }
                     break;
                 case 'zip':
                     $headerLength = 30;
@@ -83,7 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check if the admin is logged in
     if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
         // Display Log Out button if admin is logged in
-        echo '<a href="logout.php" class="btn btn-danger">Log Out</a>';
+        echo '<a href="admin.php" class="btn btn-danger">Admin Panel</a>';
+        echo '  <a href="logout.php" class="btn btn-danger">Log Out</a>';
     } else {
         // Display Admin Login button if admin is not logged in
         echo '<a href="admin_login.php" class="btn btn-primary">Admin Login</a>';
@@ -117,7 +123,7 @@ function validateFile() {
         return false;
     }
     return true;
-} 
+}
 </script>
 
 <?php

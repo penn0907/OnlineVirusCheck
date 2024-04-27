@@ -35,7 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $headerLength = 0x3C; // Header length before PE header in executable files
                         break;
                     case 'pdf':
-                        $headerLength = 5; // "%PDF-" is 5 bytes long
+                        // Dynamically find the first occurrence of 'obj' to determine the start of content
+                        if (preg_match('/obj/i', $fileContent, $matches, PREG_OFFSET_CAPTURE, 10)) {
+                            $headerLength = $matches[0][1]; // Position of the first 'obj'
+                        } else {
+                            $headerLength = 0; // Fallback if no 'obj' is found
+                        }
                         break;
                     case 'zip':
                         $headerLength = 30; // Common header length for ZIP files
@@ -79,7 +84,8 @@ if (!empty($error)) {
     // Check if the admin is logged in
     if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
         // Display Log Out button if admin is logged in
-        echo '<a href="logout.php" class="btn btn-danger">Log Out</a>';
+        echo '<a href="index.php" class="btn btn-danger">Home Page</a>';
+        echo '  <a href="logout.php" class="btn btn-danger">Log Out</a>';
     }
     ?>
 </div>
