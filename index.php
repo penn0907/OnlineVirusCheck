@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			<div class="form-group">
 				<label for="fileToCheck">Select file to upload(.exe, .pdf, .zip files):</label> <input
 					type="file" name="fileToCheck" id="fileToCheck"
-					class="form-control-file" required>
+					class="form-control-file" required style="max-width: 300px;">
 			</div>
 			<button type="submit" class="btn btn-success">Upload File</button>
 		</form>
@@ -112,19 +112,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     ?>
 
 		<script>
-function validateFile() {
-    var fileInput = document.getElementById('fileToCheck');
-    var filePath = fileInput.value;
-    var allowedExtensions = /\.(exe|pdf|zip)$/i; // Updated allowed file types
-
-    if (!allowedExtensions.exec(filePath)) {
-        alert('Invalid file type. Only .exe, .pdf, and .zip files are allowed.');
-        fileInput.value = ''; // Clear the file input
-        return false;
-    }
-    return true;
-}
-</script>
+            function validateFile() {
+                var fileInput = document.getElementById('fileToCheck');
+                var filePath = fileInput.value;
+                var allowedExtensions = /\.(exe|pdf|zip)$/i; // Updated allowed file types
+            
+                if (!allowedExtensions.exec(filePath)) {
+                    alert('Invalid file type. Only .exe, .pdf, and .zip files are allowed.');
+                    fileInput.value = ''; // Clear the file input
+                    return false;
+                }
+                return true;
+            }
+        </script>
 
 <?php
 include 'templates/footer.php'; // HTML footer
