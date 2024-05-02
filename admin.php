@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	<div class="form-group">
 		<label for="malwareName">Malware Name:</label> <input type="text"
 			name="malwareName" id="malwareName" class="form-control" required
-			pattern="[a-zA-Z0-9]+">
+			pattern="[a-zA-Z0-9]+" required style="max-width: 300px;">
 	</div>
 	<div class="form-group">
 		<label for="malwareFile">Select malware file to upload(.exe, .pdf,

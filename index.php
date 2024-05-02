@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		<form action="index.php" method="post" enctype="multipart/form-data"
 			onsubmit="return validateFile()" class="mb-3">
 			<div class="form-group">
-				<label for="fileToCheck">Select file to upload:</label> <input
+				<label for="fileToCheck">Select file to upload(.exe, .pdf, .zip files):</label> <input
 					type="file" name="fileToCheck" id="fileToCheck"
 					class="form-control-file" required>
 			</div>
