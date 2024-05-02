@@ -4,7 +4,7 @@ include 'includes/db.php';
 include 'templates/header.php'; // HTML header
 
 // Redirect user to login page if not log in
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+if (! isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
     header('Location: admin_login.php');
     exit();
 }
@@ -13,69 +13,83 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check for a valid malware name
     $malwareName = $_POST['malwareName'] ?? '';
-    if (!preg_match('/^[a-zA-Z0-9]+$/', $malwareName)) {
+    if (! preg_match('/^[a-zA-Z0-9]+$/', $malwareName)) {
         $error = "Malware name must contain only letters and digits.";
     } else {
         // Process the uploaded file if malware name is valid
         if (isset($_FILES['malwareFile']) && $_FILES['malwareFile']['error'] == UPLOAD_ERR_OK) {
-            
-            $allowedTypes = ['application/x-msdownload', 'application/pdf', 'application/zip']; // types for exe, pdf, and zip
+
+            $allowedTypes = [
+                'application/x-msdownload',
+                'application/pdf',
+                'application/zip'
+            ]; // types for exe, pdf, and zip
             $fileType = $_FILES['malwareFile']['type'];
-            
+
             if (in_array($fileType, $allowedTypes)) {
                 $filePath = $_FILES['malwareFile']['tmp_name'];
                 $fileContent = file_get_contents($filePath);
                 $fileExtension = strtolower(pathinfo($_FILES['malwareFile']['name'], PATHINFO_EXTENSION));
-                
-                // Default to the first 20 bytes
-                $headerLength = 20;
-                
-                switch ($fileExtension) {
-                    case 'exe':
-                        $headerLength = 0x3C; // Header length before PE header in executable files
-                        break;
-                    case 'pdf':
-                        // Dynamically find the first occurrence of 'obj' to determine the start of content
-                        if (preg_match('/obj/i', $fileContent, $matches, PREG_OFFSET_CAPTURE, 10)) {
-                            $headerLength = $matches[0][1]; // Position of the first 'obj'
-                        } else {
-                            $headerLength = 0; // Fallback if no 'obj' is found
-                        }
-                        break;
-                    case 'zip':
-                        $headerLength = 30; // Common header length for ZIP files
-                        break;
-                }
-                
-                $signature = substr($fileContent, $headerLength, 20); // Get 20 bytes after the header
-                
-                // Save the malware name and signature into the database
+
                 $conn = getDatabaseConnection();
-                $stmt = $conn->prepare("INSERT INTO malware_signatures (name, signature) VALUES (?, ?)");
-                $stmt->bind_param("sb", $malwareName, $signature);
-                $stmt->send_long_data(1, $signature);
-                
-                if ($stmt->execute()) {
-                    echo "Malware signature uploaded successfully.";
+
+                // Check if the malware name already exists in the database
+                $stmt = $conn->prepare("SELECT COUNT(*) FROM malware_signatures WHERE name = ?");
+                $stmt->bind_param("s", $malwareName);
+                $stmt->execute();
+                $stmt->store_result();
+                $stmt->bind_result($count);
+                $stmt->fetch();
+
+                if ($count > 0) {
+                    $error = "A malware signature with that name already exists.";
                 } else {
-                    echo "Failed to upload malware signature. Error: " . $stmt->error;
+
+                    // Default to the first 20 bytes
+                    $headerLength = 20;
+
+                    switch ($fileExtension) {
+                        case 'exe':
+                            $headerLength = 0x3C; // Header length before PE header in executable files
+                            break;
+                        case 'pdf':
+                            // Dynamically find the first occurrence of 'obj' to determine the start of content
+                            if (preg_match('/obj/i', $fileContent, $matches, PREG_OFFSET_CAPTURE, 10)) {
+                                $headerLength = $matches[0][1]; // Position of the first 'obj'
+                            } else {
+                                $headerLength = 0; // Fallback if no 'obj' is found
+                            }
+                            break;
+                        case 'zip':
+                            $headerLength = 30; // Common header length for ZIP files
+                            break;
+                    }
+
+                    $signature = substr($fileContent, $headerLength, 20); // Get 20 bytes after the header
+
+                    // Save the malware name and signature into the database
+
+                    $stmt = $conn->prepare("INSERT INTO malware_signatures (name, signature) VALUES (?, ?)");
+                    $stmt->bind_param("sb", $malwareName, $signature);
+                    $stmt->send_long_data(1, $signature);
+
+                    if ($stmt->execute()) {
+                        $error = "Malware signature uploaded successfully.";
+                    } else {
+                        $error = "Failed to upload malware signature. Error: " . $stmt->error;
+                    }
+                    $stmt->close();
+                    $conn->close();
                 }
-                $stmt->close();
-                $conn->close();
             } else {
-                echo "Unsupported file type. Only .exe, .pdf, and .zip files are allowed.";
+                $error = "Unsupported file type. Only .exe, .pdf, and .zip files are allowed.";
             }
-            
-           
         } else {
             $error = "Failed to upload file.";
         }
     }
 }
 
-if (!empty($error)) {
-    echo "<p style='color:red;'>$error</p>";
-}
 ?>
 
 <h1>Admin Panel - Upload Malware</h1>
@@ -89,18 +103,25 @@ if (!empty($error)) {
     }
     ?>
 </div>
-<form action="admin.php" method="post" enctype="multipart/form-data" onsubmit="return validateFile()">
-    <div class="form-group">
-        <label for="malwareName">Malware Name:</label>
-        <input type="text" name="malwareName" id="malwareName" class="form-control" required pattern="[a-zA-Z0-9]+">
-    </div>
-    <div class="form-group">
-        <label for="malwareFile">Select malware file to upload(.exe, .pdf, .zip files):</label>
-        <input type="file" name="malwareFile" id="malwareFile" class="form-control-file" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Upload Malware</button>
+<form action="admin.php" method="post" enctype="multipart/form-data"
+	onsubmit="return validateFile()">
+	<div class="form-group">
+		<label for="malwareName">Malware Name:</label> <input type="text"
+			name="malwareName" id="malwareName" class="form-control" required
+			pattern="[a-zA-Z0-9]+">
+	</div>
+	<div class="form-group">
+		<label for="malwareFile">Select malware file to upload(.exe, .pdf,
+			.zip files):</label> <input type="file" name="malwareFile"
+			id="malwareFile" class="form-control-file" required>
+	</div>
+	<button type="submit" class="btn btn-primary">Upload Malware</button>
 </form>
-
+<?php 
+if (! empty($error)) {
+    echo "<div class='alert alert-info'>$error</div>";
+}
+?>
 <script>
 function validateFile() {
     var fileInput = document.getElementById('malwareFile');
