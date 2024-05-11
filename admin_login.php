@@ -48,19 +48,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 include 'templates/header.php'; // HTML header
 ?>
 
-<h1>Admin Login</h1>
-<form id="loginForm" action="admin_login.php" method="post" onsubmit="return validateLogin()">
-    <div class="form-group">
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" class="form-control" required style="max-width: 300px;">
-    </div>
-    <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" class="form-control" required style="max-width: 300px;">
-    </div>
-<?php if (!empty($error)) echo "<p class='error'>$error</p>"; ?>
-    <button type="submit" class="btn btn-primary">Login</button>
-</form>
+
+<div class="d-flex justify-content-center align-items-center" style="height: 60vh;">
+    <form id="loginForm" action="admin_login.php" method="post" onsubmit="return validateLogin()" class="mb-3 main-centered">
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" class="form-control" required style="max-width: 300px;">
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" class="form-control" required style="max-width: 300px;">
+        </div>
+    <?php if (!empty($error)) echo "<p class='error'>$error</p>"; ?>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
 
 <script>
 function validateLogin() {

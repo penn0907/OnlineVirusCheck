@@ -80,52 +80,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-	<div class="container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 d-flex justify-content-between align-items-center main-header">
+                <a href="index.php"><h1>Online Virus Check</h1></a>
+            
+                <div class="my-4">
+                <?php
+                // Check if the admin is logged in
+                if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
+                    // Display Log Out button if admin is logged in
+                    echo '  <a href="logout.php" class="btn btn-danger ml-auto">Log Out</a>';
+                } else {
+                    // Display Admin Login button if admin is not logged in
+                    echo '<a href="admin_login.php" class="btn btn-primary ml-auto">Admin Login</a>';
+                }
+                ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="d-flex justify-content-center align-items-center" style="height: 40vh;">
+            <form action="index.php" method="post" enctype="multipart/form-data"
+                onsubmit="return validateFile()" class="mb-3 main-centered">
+                <div class="form-group">
+                    <label for="fileToCheck">Select file to upload (.exe, .pdf, .zip files):</label>
+                    <input type="file" name="fileToCheck" id="fileToCheck"
+                        class="form-control-file" required style="max-width: 300px;">
+                </div>
+                <hr>
+                <button type="submit" class="btn btn-success">Upload File</button>
+            </form>
+        </div>
 
-		<h1 class="mt-3">Welcome to Online Virus Check</h1>
-		<div class="my-4">
     <?php
-    // Check if the admin is logged in
-    if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-        // Display Log Out button if admin is logged in
-        echo '<a href="admin.php" class="btn btn-danger">Admin Panel</a>';
-        echo '  <a href="logout.php" class="btn btn-danger">Log Out</a>';
-    } else {
-        // Display Admin Login button if admin is not logged in
-        echo '<a href="admin_login.php" class="btn btn-primary">Admin Login</a>';
-    }
-    ?>
-</div>
-		<form action="index.php" method="post" enctype="multipart/form-data"
-			onsubmit="return validateFile()" class="mb-3">
-			<div class="form-group">
-				<label for="fileToCheck">Select file to upload(.exe, .pdf, .zip files):</label> <input
-					type="file" name="fileToCheck" id="fileToCheck"
-					class="form-control-file" required style="max-width: 300px;">
-			</div>
-			<button type="submit" class="btn btn-success">Upload File</button>
-		</form>
-		<?php
     if (!empty($errorMessage)) {
         echo "<div class='alert alert-info'>$errorMessage</div>";
     }
     ?>
-
-		<script>
-            function validateFile() {
-                var fileInput = document.getElementById('fileToCheck');
-                var filePath = fileInput.value;
-                var allowedExtensions = /\.(exe|pdf|zip)$/i; // Updated allowed file types
-            
-                if (!allowedExtensions.exec(filePath)) {
-                    alert('Invalid file type. Only .exe, .pdf, and .zip files are allowed.');
-                    fileInput.value = ''; // Clear the file input
-                    return false;
-                }
-                return true;
+    <script>
+        function validateFile() {
+            var fileInput = document.getElementById('fileToCheck');
+            var filePath = fileInput.value;
+            var allowedExtensions = /\.(exe|pdf|zip)$/i; // Updated allowed file types
+        
+            if (!allowedExtensions.exec(filePath)) {
+                alert('Invalid file type. Only .exe, .pdf, and .zip files are allowed.');
+                fileInput.value = ''; // Clear the file input
+                return false;
             }
-        </script>
-
-<?php
-include 'templates/footer.php'; // HTML footer
-?>
+            return true;
+        }
+    </script>
+    <?php
+    include 'templates/footer.php'; // HTML footer
+    ?>
+</body>
+</html>

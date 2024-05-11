@@ -1,7 +1,7 @@
 <?php
 define("DB_SERVER", "localhost");
-define("DB_USER", "jdbcUser");
-define("DB_PASSWORD", "cs157a");
+define("DB_USER", "root");//jdbcUser
+define("DB_PASSWORD", ""); //cs157a
 define("DB_NAME", "cs174");
 
 function getDatabaseConnection() {

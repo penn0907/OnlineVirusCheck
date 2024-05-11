@@ -1,0 +1,38 @@
+/*Center*/
+.main-centered{
+    border: 2px solid #ddd; 
+    border-radius: 10px; 
+    padding: 30px; 
+    background-color: #f9f9f9; 
+    margin: 20px;
+}
+
+/*Table*/
+table {
+    width: 50%;
+    border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid black;
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+/*Header*/
+.main-header {
+    margin: 20px 0;
+}
+.main-header a {
+    text-decoration: none;
+}
+.main-header a h1 {
+    color: black; 
+}
+.main-header a:hover, .main-header a:focus, .main-header a:active {
+    text-decoration: none; 
+}
+.main-header a:hover h1, .main-header a:focus h1, .main-header a:active h1 {
+    color: black; 
+}

@@ -9,6 +9,10 @@ if (! isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tr
     exit();
 }
 
+//Print malware in the database
+$conn = getDatabaseConnection();
+$result = $conn->query("SELECT id, name FROM malware_signatures");
+
 // Handle file upload logic after form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check for a valid malware name
@@ -31,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $fileContent = file_get_contents($filePath);
                 $fileExtension = strtolower(pathinfo($_FILES['malwareFile']['name'], PATHINFO_EXTENSION));
 
-                $conn = getDatabaseConnection();
+                //$conn = getDatabaseConnection();
 
                 // Check if the malware name already exists in the database
                 $stmt = $conn->prepare("SELECT COUNT(*) FROM malware_signatures WHERE name = ?");
@@ -89,34 +93,67 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-
 ?>
 
-<h1>Admin Panel - Upload Malware</h1>
-<div class="my-4">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 d-flex justify-content-between align-items-center main-header">
+            <a href="index.php"><h1>Online Virus Check</h1></a>
+        
+            <div class="my-4">
+            <?php
+            // Check if the admin is logged in
+            if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
+                // Display Log Out button if admin is logged in
+                echo '  <a href="logout.php" class="btn btn-danger ml-auto">Log Out</a>';
+            }
+            ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-center align-items-center" style="height: 40vh;">
+    <form action="admin.php" method="post" enctype="multipart/form-data"
+        onsubmit="return validateFile()" class="mb-3 main-centered">
+        <div class="form-group">
+            <label for="malwareName">Malware Name:</label> <input type="text"
+                name="malwareName" id="malwareName" class="form-control" required
+                pattern="[a-zA-Z0-9]+" required style="max-width: 300px;">
+        </div>
+        <div class="form-group">
+            <label for="malwareFile">Select malware file to upload(.exe, .pdf,
+                .zip files):</label> <input type="file" name="malwareFile"
+                id="malwareFile" class="form-control-file" required>
+        </div>
+        <hr>
+        <button type="submit" class="btn btn-primary">Upload Malware</button>
+    </form>
+</div>
+
+<br></br>
+<h3>Uploaded Malwares</h3>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+    </tr>
     <?php
-    // Check if the admin is logged in
-    if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-        // Display Log Out button if admin is logged in
-        echo '<a href="index.php" class="btn btn-danger">Home Page</a>';
-        echo '  <a href="logout.php" class="btn btn-danger">Log Out</a>';
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . $row["id"] . "</td>";
+            echo "<td>" . $row["name"] . "</td>";
+            echo "</tr>";
+        }
+    } else {
+        echo "<tr><td colspan='2'>No results found</td></tr>";
     }
     ?>
-</div>
-<form action="admin.php" method="post" enctype="multipart/form-data"
-	onsubmit="return validateFile()">
-	<div class="form-group">
-		<label for="malwareName">Malware Name:</label> <input type="text"
-			name="malwareName" id="malwareName" class="form-control" required
-			pattern="[a-zA-Z0-9]+" required style="max-width: 300px;">
-	</div>
-	<div class="form-group">
-		<label for="malwareFile">Select malware file to upload(.exe, .pdf,
-			.zip files):</label> <input type="file" name="malwareFile"
-			id="malwareFile" class="form-control-file" required>
-	</div>
-	<button type="submit" class="btn btn-primary">Upload Malware</button>
-</form>
+</table>
+
+</body>
+</html>
 <?php 
 if (! empty($error)) {
     echo "<div class='alert alert-info'>$error</div>";
